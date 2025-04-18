@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manga Reader by Heisenberg 💕</title>
+  <title>Manga Reader by Heisenberg 💖</title>
   <style>
     * {
       box-sizing: border-box;
@@ -38,20 +38,15 @@
       padding: 20px;
       overflow: hidden;
     }
-    img {
-      max-width: 95%;
-      max-height: 85vh;
-      object-fit: contain;
-      box-shadow: 0 0 10px #000;
-      margin: 20px 0;
-      border-radius: 8px;
-      transition: opacity 0.3s ease;
-    }
     #controls {
       display: flex;
       gap: 20px;
       justify-content: center;
-      margin-top: 10px;
+      margin-bottom: 20px;
+      visibility: hidden;
+    }
+    #controls.visible {
+      visibility: visible;
     }
     button {
       padding: 10px;
@@ -64,6 +59,19 @@
     button:hover {
       background: #444;
     }
+    img {
+      max-width: 95%;
+      max-height: 80vh;
+      object-fit: contain;
+      box-shadow: 0 0 10px #000;
+      border-radius: 8px;
+      transition: opacity 0.3s ease;
+      display: none;
+    }
+    #title {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
   </style>
 </head>
 <body>
@@ -74,18 +82,17 @@
 
   <div id="main">
     <h1 id="title">Kliknij mangę po lewej 💖</h1>
-    <img id="manga-page" src="" style="display:none;" />
-    <div id="controls" style="display:none;">
+    <div id="controls">
       <button onclick="prevPage()">⬅️ Poprzednia</button>
       <button onclick="nextPage()">➡️ Następna</button>
     </div>
+    <img id="manga-page" src="" alt="Manga page" />
   </div>
 
   <script>
-    const totalPages = 2; // <- zmień na liczbę stron Twojej mangi
+    const totalPages = 2; // Zmień to na ilość stron
     const mangaFolder = "manga/";
     const mangaExt = ".jpg";
-
     let currentIndex = 1;
 
     const mangaPage = document.getElementById("manga-page");
@@ -118,11 +125,10 @@
       currentIndex = 1;
       loadPage(currentIndex);
       mangaPage.style.display = "block";
-      controls.style.display = "flex";
+      controls.classList.add("visible");
       title.textContent = "📖 Moja Manga";
     }
 
-    // Obsługa strzałek
     window.addEventListener('keydown', (e) => {
       if (mangaPage.style.display !== "none") {
         if (e.key === 'ArrowRight') nextPage();
