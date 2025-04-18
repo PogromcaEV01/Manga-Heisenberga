@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Manga Heisenberga 💖</title>
+  <title id="pageTitle">Manga Heisenberga 💖</title>
   <link rel="icon" type="image/png" href="favicon.png" />
   <style>
     * {
@@ -70,7 +70,6 @@
       max-height: 80vh;
       object-fit: contain;
       box-shadow: 0 0 10px #000;
-      border-radius: 0px;
       display: none;
     }
     .nav-btn {
@@ -94,12 +93,36 @@
     .hidden {
       display: none !important;
     }
+    #settingsPanel {
+      position: fixed;
+      bottom: 4rem;
+      left: 1rem;
+      background: #fff;
+      color: #000;
+      border: 2px solid #ccc;
+      padding: 1rem;
+      border-radius: 1rem;
+      box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+      z-index: 999;
+    }
+    #settingsBtn {
+      position: fixed;
+      bottom: 1rem;
+      left: 1rem;
+      z-index: 999;
+      background: #2a2a2a;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 8px 12px;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
   <div id="sidebar">
-    <h2>📚 Manga</h2>
-    <button onclick="showChapters()">📘 Moja Manga</button>
+    <h2 id="mangaHeader">📚 Manga</h2>
+    <button id="myMangaBtn" onclick="showChapters()">📘 Moja Manga</button>
     <div id="chapterList" class="hidden"></div>
   </div>
 
@@ -112,6 +135,25 @@
     </div>
   </div>
 
+  <div id="settingsPanel" class="hidden">
+    <h2 id="settingsTitle">Ustawienia</h2>
+    <div>
+      <label id="cornerStyleLabel">Styl rogów:</label><br />
+      <input type="radio" name="corners" value="rounded" id="rounded" />
+      <label for="rounded" id="roundedLabel">Zaokrąglone</label><br />
+      <input type="radio" name="corners" value="sharp" id="sharp" />
+      <label for="sharp" id="sharpLabel">Ostre</label>
+    </div>
+    <div style="margin-top: 1em;">
+      <label id="languageLabel">Język interfejsu:</label><br />
+      <select id="languageSelect">
+        <option value="pl">Polski 🇵🇱</option>
+        <option value="en">English 🇬🇧</option>
+      </select>
+    </div>
+  </div>
+  <button id="settingsBtn">⚙️</button>
+
   <script>
     const chapters = {
       "Rozdział 1": "chapter1",
@@ -120,7 +162,7 @@
 
     let currentChapter = "";
     let currentPage = 1;
-    let totalPages = 0;
+    let totalPages = 50;
 
     const title = document.getElementById("title");
     const chapterList = document.getElementById("chapterList");
@@ -131,7 +173,6 @@
     function showChapters() {
       chapterList.innerHTML = "";
       chapterList.classList.remove("hidden");
-
       for (const [label, folder] of Object.entries(chapters)) {
         const btn = document.createElement("button");
         btn.textContent = label;
@@ -143,8 +184,6 @@
     function startChapter(folder, label) {
       currentChapter = folder;
       currentPage = 1;
-      totalPages = 50; // ZMIEŃ NA ILOŚĆ STRON W KAŻDYM ROZDZIALE
-
       title.textContent = label;
       chapterList.classList.add("hidden");
       loadPage(currentPage);
@@ -180,6 +219,78 @@
         if (e.key === "ArrowRight") nextPage();
         if (e.key === "ArrowLeft") prevPage();
       }
+    });
+
+    const settingsBtn = document.getElementById("settingsBtn");
+    const settingsPanel = document.getElementById("settingsPanel");
+
+    const langStrings = {
+      pl: {
+        pageTitle: "Manga Heisenberga 💖",
+        mangaHeader: "📚 Manga",
+        myMangaBtn: "📘 Moja Manga",
+        titleText: "Kliknij mangę po lewej 💖",
+        settingsTitle: "Ustawienia",
+        cornerStyleLabel: "Styl rogów:",
+        roundedLabel: "Zaokrąglone",
+        sharpLabel: "Ostre",
+        languageLabel: "Język interfejsu:"
+      },
+      en: {
+        pageTitle: "Heisenberg's Manga 💖",
+        mangaHeader: "📚 Manga",
+        myMangaBtn: "📘 My Manga",
+        titleText: "Click manga on the left 💖",
+        settingsTitle: "Settings",
+        cornerStyleLabel: "Corner style:",
+        roundedLabel: "Rounded",
+        sharpLabel: "Sharp",
+        languageLabel: "Interface language:"
+      }
+    };
+
+    function applyLanguage(lang) {
+      const strings = langStrings[lang] || langStrings.pl;
+      document.title = strings.pageTitle;
+      document.getElementById("pageTitle").innerText = strings.pageTitle;
+      document.getElementById("mangaHeader").innerText = strings.mangaHeader;
+      document.getElementById("myMangaBtn").innerText = strings.myMangaBtn;
+      document.getElementById("title").innerText = strings.titleText;
+      document.getElementById("settingsTitle").innerText = strings.settingsTitle;
+      document.getElementById("cornerStyleLabel").innerText = strings.cornerStyleLabel;
+      document.getElementById("roundedLabel").innerText = strings.roundedLabel;
+      document.getElementById("sharpLabel").innerText = strings.sharpLabel;
+      document.getElementById("languageLabel").innerText = strings.languageLabel;
+    }
+
+    function applyCornerStyle(style) {
+      if (mangaPage) {
+        mangaPage.style.borderRadius = style === "rounded" ? "1rem" : "0";
+      }
+    }
+
+    settingsBtn.addEventListener("click", () => {
+      settingsPanel.classList.toggle("hidden");
+    });
+
+    const savedLang = localStorage.getItem("language") || "pl";
+    const savedCorners = localStorage.getItem("corners") || "rounded";
+    document.getElementById(savedCorners).checked = true;
+    document.getElementById("languageSelect").value = savedLang;
+    applyLanguage(savedLang);
+    applyCornerStyle(savedCorners);
+
+    document.getElementsByName("corners").forEach(r => {
+      r.addEventListener("change", () => {
+        applyCornerStyle(r.value);
+        localStorage.setItem("corners", r.value);
+      });
+    });
+
+    document.getElementById("languageSelect").addEventListener("change", (e) => {
+      const lang = e.target.value;
+      localStorage.setItem("language", lang);
+      applyLanguage(lang);
     });
   </script>
 </body>
