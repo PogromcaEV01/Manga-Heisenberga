@@ -5,20 +5,38 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Manga Reader by Heisenberg 💕</title>
   <style>
+    * {
+      box-sizing: border-box;
+    }
     body {
       margin: 0;
-      background: #0f0f0f;
-      color: #fff;
       font-family: 'Segoe UI', sans-serif;
+      background-color: #0f0f0f;
+      color: white;
+      display: flex;
+      height: 100vh;
+    }
+    #sidebar {
+      width: 200px;
+      background: #1a1a1a;
+      padding: 20px;
+      border-right: 2px solid #333;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    #sidebar h2 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+    #main {
+      flex-grow: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: start;
-      min-height: 100vh;
-    }
-    h1 {
-      margin-top: 20px;
-      text-shadow: 2px 2px 4px #000;
+      padding: 20px;
+      overflow: hidden;
     }
     img {
       max-width: 95%;
@@ -33,43 +51,50 @@
       display: flex;
       gap: 20px;
       justify-content: center;
-      margin-bottom: 30px;
+      margin-top: 10px;
     }
     button {
-      padding: 10px 20px;
-      background: #1e1e1e;
+      padding: 10px;
+      background: #2a2a2a;
       color: white;
       border: none;
+      border-radius: 5px;
       cursor: pointer;
-      border-radius: 6px;
-      font-size: 16px;
     }
     button:hover {
-      background: #333;
+      background: #444;
     }
   </style>
 </head>
 <body>
-  <h1>📖 Manga Reader: <span id="title">Twoja Manga</span></h1>
-  <img id="manga-page" src="" alt="Manga page" />
-  <div id="controls">
-    <button onclick="prevPage()">⬅️ Poprzednia</button>
-    <button onclick="nextPage()">➡️ Następna</button>
+  <div id="sidebar">
+    <h2>📚 Manga List</h2>
+    <button onclick="startManga()">📘 Moja Manga</button>
+  </div>
+
+  <div id="main">
+    <h1 id="title">Kliknij mangę po lewej 💖</h1>
+    <img id="manga-page" src="" style="display:none;" />
+    <div id="controls" style="display:none;">
+      <button onclick="prevPage()">⬅️ Poprzednia</button>
+      <button onclick="nextPage()">➡️ Następna</button>
+    </div>
   </div>
 
   <script>
-    const totalPages = 1; // Zmien tutaj na ilosc twoich JPG
-    const mangaFolder = "manga";
-    const mangaPrefix = "";
+    const totalPages = 1; // <- zmień na liczbę stron Twojej mangi
+    const mangaFolder = "manga/";
     const mangaExt = ".jpg";
 
     let currentIndex = 1;
 
     const mangaPage = document.getElementById("manga-page");
+    const title = document.getElementById("title");
+    const controls = document.getElementById("controls");
 
     function loadPage(index) {
       const num = String(index).padStart(3, '0');
-      const path = `${mangaFolder}${mangaPrefix}${num}${mangaExt}`;
+      const path = `${mangaFolder}${num}${mangaExt}`;
       mangaPage.style.opacity = 0;
       mangaPage.onload = () => mangaPage.style.opacity = 1;
       mangaPage.src = path;
@@ -89,14 +114,20 @@
       }
     }
 
-    window.onload = () => {
+    function startManga() {
+      currentIndex = 1;
       loadPage(currentIndex);
-    };
+      mangaPage.style.display = "block";
+      controls.style.display = "flex";
+      title.textContent = "📖 Moja Manga";
+    }
 
     // Obsługa strzałek
     window.addEventListener('keydown', (e) => {
-      if (e.key === 'ArrowRight') nextPage();
-      if (e.key === 'ArrowLeft') prevPage();
+      if (mangaPage.style.display !== "none") {
+        if (e.key === 'ArrowRight') nextPage();
+        if (e.key === 'ArrowLeft') prevPage();
+      }
     });
   </script>
 </body>
