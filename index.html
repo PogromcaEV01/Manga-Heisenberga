@@ -24,13 +24,28 @@
       display: flex;
       flex-direction: column;
       gap: 20px;
+      overflow-y: auto;
     }
     #sidebar h2 {
       font-size: 18px;
       margin-bottom: 10px;
     }
+    #sidebar button {
+      background: #2a2a2a;
+      border: none;
+      color: white;
+      padding: 10px;
+      margin-bottom: 5px;
+      border-radius: 5px;
+      cursor: pointer;
+      text-align: left;
+    }
+    #sidebar button:hover {
+      background: #444;
+    }
     #main {
       flex-grow: 1;
+      position: relative;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -38,101 +53,131 @@
       padding: 20px;
       overflow: hidden;
     }
-    #controls {
+    #title {
+      font-size: 24px;
+      margin-bottom: 10px;
+    }
+    #manga-container {
+      position: relative;
       display: flex;
-      gap: 20px;
+      align-items: center;
       justify-content: center;
-      margin-bottom: 20px;
-      visibility: hidden;
+      width: 100%;
     }
-    #controls.visible {
-      visibility: visible;
-    }
-    button {
-      padding: 10px;
-      background: #2a2a2a;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    button:hover {
-      background: #444;
-    }
-    img {
+    #manga-page {
       max-width: 95%;
       max-height: 80vh;
       object-fit: contain;
       box-shadow: 0 0 10px #000;
       border-radius: 8px;
-      transition: opacity 0.3s ease;
       display: none;
     }
-    #title {
+    .nav-btn {
+      position: absolute;
+      top: 50%;
+      transform: translateY(-50%);
+      background: rgba(42, 42, 42, 0.8);
+      border: none;
+      color: white;
       font-size: 24px;
-      margin-bottom: 10px;
+      padding: 10px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #prevBtn {
+      left: 10px;
+    }
+    #nextBtn {
+      right: 10px;
+    }
+    .hidden {
+      display: none !important;
     }
   </style>
 </head>
 <body>
   <div id="sidebar">
-    <h2>📚 Manga List</h2>
-    <button onclick="startManga()">📘 Moja Manga</button>
+    <h2>📚 Manga</h2>
+    <button onclick="showChapters()">📘 Moja Manga</button>
+    <div id="chapterList" class="hidden"></div>
   </div>
 
   <div id="main">
     <h1 id="title">Kliknij mangę po lewej 💖</h1>
-    <div id="controls">
-      <button onclick="prevPage()">⬅️ Poprzednia</button>
-      <button onclick="nextPage()">➡️ Następna</button>
+    <div id="manga-container">
+      <button id="prevBtn" class="nav-btn hidden" onclick="prevPage()">⬅️</button>
+      <img id="manga-page" src="" />
+      <button id="nextBtn" class="nav-btn hidden" onclick="nextPage()">➡️</button>
     </div>
-    <img id="manga-page" src="" alt="Manga page" />
   </div>
 
   <script>
-    const totalPages = 3; // Zmień to na ilość stron
-    const mangaFolder = "manga/";
-    const mangaExt = ".jpg";
-    let currentIndex = 1;
+    const chapters = {
+      "Rozdział 1": "chapter1",
+      "Rozdział 2": "chapter2"
+    };
 
-    const mangaPage = document.getElementById("manga-page");
+    let currentChapter = "";
+    let currentPage = 1;
+    let totalPages = 0;
+
     const title = document.getElementById("title");
-    const controls = document.getElementById("controls");
+    const chapterList = document.getElementById("chapterList");
+    const mangaPage = document.getElementById("manga-page");
+    const prevBtn = document.getElementById("prevBtn");
+    const nextBtn = document.getElementById("nextBtn");
+
+    function showChapters() {
+      chapterList.innerHTML = "";
+      chapterList.classList.remove("hidden");
+
+      for (const [label, folder] of Object.entries(chapters)) {
+        const btn = document.createElement("button");
+        btn.textContent = label;
+        btn.onclick = () => startChapter(folder, label);
+        chapterList.appendChild(btn);
+      }
+    }
+
+    function startChapter(folder, label) {
+      currentChapter = folder;
+      currentPage = 1;
+      totalPages = 50; // ZMIEŃ NA ILOŚĆ STRON W KAŻDYM ROZDZIALE
+
+      title.textContent = label;
+      chapterList.classList.add("hidden");
+      loadPage(currentPage);
+      mangaPage.style.display = "block";
+      prevBtn.classList.remove("hidden");
+      nextBtn.classList.remove("hidden");
+    }
 
     function loadPage(index) {
       const num = String(index).padStart(3, '0');
-      const path = `${mangaFolder}${num}${mangaExt}`;
+      const path = `manga/${currentChapter}/${num}.jpg`;
       mangaPage.style.opacity = 0;
       mangaPage.onload = () => mangaPage.style.opacity = 1;
       mangaPage.src = path;
     }
 
     function nextPage() {
-      if (currentIndex < totalPages) {
-        currentIndex++;
-        loadPage(currentIndex);
+      if (currentPage < totalPages) {
+        currentPage++;
+        loadPage(currentPage);
       }
     }
 
     function prevPage() {
-      if (currentIndex > 1) {
-        currentIndex--;
-        loadPage(currentIndex);
+      if (currentPage > 1) {
+        currentPage--;
+        loadPage(currentPage);
       }
     }
 
-    function startManga() {
-      currentIndex = 1;
-      loadPage(currentIndex);
-      mangaPage.style.display = "block";
-      controls.classList.add("visible");
-      title.textContent = "📖 Moja Manga";
-    }
-
-    window.addEventListener('keydown', (e) => {
+    window.addEventListener("keydown", (e) => {
       if (mangaPage.style.display !== "none") {
-        if (e.key === 'ArrowRight') nextPage();
-        if (e.key === 'ArrowLeft') prevPage();
+        if (e.key === "ArrowRight") nextPage();
+        if (e.key === "ArrowLeft") prevPage();
       }
     });
   </script>
